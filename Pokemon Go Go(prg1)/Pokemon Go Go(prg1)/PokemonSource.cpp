@@ -19,16 +19,71 @@ that add up to the smallest distance and the distance traveled in blocks
 #include<iostream>
 #include<algorithm>
 #include<vector>
+#include<string>
 using namespace std;
 
+struct Location
+{//REASON: used for storing the coordinates of each pokemon together with their names.
+	int N_S;
+	int E_W;
+	string pokemon;
+	Location(int x = 0, int y = 0, string nm = "")// default construction created for easy coding
+	{
+		N_S = x;
+		E_W = y;
+		pokemon= nm;
+	}
+};
+class Path
+{
+	vector<Location> blocks;
+	vector<int> nr;
+public:
+	Path(vector<Location> loc)
+	{
+		blocks = loc;
+	}
+	void deleteSamePokemon()
+	{
+		for (int i = 0; i < blocks.size(); i++)
+		{
+			for (int j = i + 1; j < blocks.size(); j++)
+			{
+				if (blocks[i].pokemon == blocks[j].pokemon)
+				{
+					if ((blocks[i].N_S + blocks[i].E_W) > (blocks[j].N_S + blocks[j].E_W))
+					{
+						blocks.erase(blocks.begin() + i);
+					}
+					if ((blocks[i].N_S + blocks[i].E_W) <= (blocks[j].N_S + blocks[j].E_W))
+					{
+						blocks.erase(blocks.begin() + j);
+					}
+				}
+			}
+		}
+	}
+	void permute()
+	{
+		for (int i = 0; i < blocks.size(); i++)
+		{
+			nr.push_back(i);
+		}
+		do {
+			for (auto i : nr)
+			{
+				//cout << blocks[i].N_S << " " << blocks[i].E_W << " " << blocks[i].pokemon << endl;
+			}
+		} while (next_permutation(nr.begin(), nr.end()));
+	}
+};
 int main()
 {
 	int nrOfPokemon;
-	int north, east;
+	int x;
+	int y;
 	string name;
-	vector<int> blocksNorth;
-	vector<int> blocksEast;
-	vector<string> pokemon;
+	vector<Location> blocks;
 
 	cin >> nrOfPokemon;
 	while (nrOfPokemon <= 0 || nrOfPokemon >= 11)
@@ -37,12 +92,12 @@ int main()
 	}
 	for (int i = 0; i < nrOfPokemon; i++)
 	{
-		cin >> north >> east;
-		getline(cin,name);
-		blocksNorth.push_back(north);
-		blocksEast.push_back(east);
-		pokemon.push_back(name);
+		cin >> x >> y>> name;
+		Location location(x,y,name);
+		blocks.push_back(location);
 	}
-
+	Path shortPath(blocks);
+	shortPath.deleteSamePokemon();
+	shortPath.permute();
 	return 0;
 }
