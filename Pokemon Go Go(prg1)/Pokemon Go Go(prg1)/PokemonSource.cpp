@@ -6,22 +6,26 @@ Prof. Bruce Elenbogen
 */
 
 /*
+DESCRIPTION:
 The purpose of this program is to permute the different locations of pokemons given by the user 
-and give back the smallest distance that can be traveled in blocks, also the path to follow in 
-order to achieve the smallest distance. The user input will consist of only integers for the 
-locations and strings for the pokemon names. The first input will be an integer n (0 < n < 11) 
-that will determine the amount of locations that the user wants the program to permute through. 
-Each of the next n inputs will consist of 2 integers separated by a space and the name of the 
-pokemon located at that location. The output will consist of the locations in the permuted order
-that add up to the smallest distance and the distance traveled in blocks
+and give back the smallest distance traveled together with the path to follow in order to 
+achieve that distance. The user input will consist of only integers for the locations and 
+strings for the pokemon names. The first input will be an integer n (0 < n < 11) that will 
+determine the amount of locations that pokemons are located nearby. Each of the next n inputs 
+will consist of 2 integers separated by a space that will represent the number or blocks, first 
+integer representing North - South direction and the other East - West direction. Separated by 
+a space will be the next input that willconsist of the name of the pokemon located at that 
+location. This will be all af the data required for one from the n inputs. 
+The output will consist of integers that will represent the order of locations visited. If any 
+locations have the same pokemon only the location with the shortest path to the starting 
+location will be calculated. The last integer will represent the number of blocks traveled 
+following the path displayed from the previous integers. 
 */
 
 #include<iostream>
 #include<algorithm>
 #include<vector>
 #include<string>
-//#include<math.h>
-//#include<stdlib.h>
 using namespace std;
 
 struct Location
@@ -76,7 +80,7 @@ public:
 		vector<int> allPaths;
  		int shortestPath;
 		int path;
-		int count = 0;
+
 		for (int i = 0; i < blocks.size(); i++)
 		{
 			nr.push_back(i);
