@@ -20,6 +20,8 @@ that add up to the smallest distance and the distance traveled in blocks
 #include<algorithm>
 #include<vector>
 #include<string>
+//#include<math.h>
+//#include<stdlib.h>
 using namespace std;
 
 struct Location
@@ -51,30 +53,60 @@ public:
 			{
 				if (blocks[i].pokemon == blocks[j].pokemon)
 				{
-					if ((blocks[i].N_S + blocks[i].E_W) > (blocks[j].N_S + blocks[j].E_W))
+					if (blocks[i].pokemon == blocks[j].pokemon && (blocks[i].N_S + blocks[i].E_W) > (blocks[j].N_S + blocks[j].E_W))
 					{
 						blocks.erase(blocks.begin() + i);
 					}
-					if ((blocks[i].N_S + blocks[i].E_W) <= (blocks[j].N_S + blocks[j].E_W))
+					if (blocks[i].pokemon == blocks[j].pokemon && (blocks[i].N_S + blocks[i].E_W) <= (blocks[j].N_S + blocks[j].E_W))
 					{
 						blocks.erase(blocks.begin() + j);
 					}
 				}
 			}
 		}
+		for (auto i : blocks)
+		{
+			cout << i.N_S << i.E_W << i.pokemon << " ";
+		}
+		cout << endl;
 	}
 	void permute()
 	{
+		vector<vector<int>> shortestPerm;
+		vector<int> allPaths;
+ 		int shortestPath;
+		int path;
+		int count = 0;
 		for (int i = 0; i < blocks.size(); i++)
 		{
 			nr.push_back(i);
 		}
+		
 		do {
-			for (auto i : nr)
+			for (int i = 0; i < nr.size(); i++)
 			{
-				//cout << blocks[i].N_S << " " << blocks[i].E_W << " " << blocks[i].pokemon << endl;
+				if (i == 0)
+				{
+					path = abs(blocks[nr[i]].N_S + blocks[nr[i]].E_W);
+				}
+				if (i > 0)
+				{
+					path = path + abs(blocks[nr[i - 1]].N_S - blocks[nr[i]].N_S) +
+						abs(blocks[nr[i - 1]].E_W - blocks[nr[i]].E_W);
+				}
 			}
+			path = path + abs(blocks[nr[nr.size() - 1]].N_S + blocks[nr[nr.size() - 1 ]].E_W);
+			allPaths.push_back(path);
+			shortestPerm.push_back(nr);
 		} while (next_permutation(nr.begin(), nr.end()));
+
+		for (auto i : shortestPerm)
+		{
+			cout << i << " ";
+		}
+		shortestPath = *min_element(allPaths.begin(), allPaths.end());
+
+		cout <<  shortestPath << endl;
 	}
 };
 int main()
