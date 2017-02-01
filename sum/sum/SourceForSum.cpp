@@ -71,22 +71,46 @@ void firstDigitRotation(vector<vector<Location>> & comboOfLocations,
 }
 
 void getCombinationOfLocations(vector<vector<Location>> & comboOfLocation,
-     vector<Location> pokeStop,vector<Location> repeatPoke, int n)
+     vector<Location> & pokeStop,vector<Location> & repeatPoke, int n)
 {
+     vector<Location> temp = pokeStop;
      if (n = 0)
      {
-          
+          comboOfLocation.push_back(pokeStop);
+          for (int j = 0; j < repeatPoke.size(); j++)
+          {
+               if (pokeStop[n].name == repeatPoke[j].name)
+               {
+                    pokeStop[n] = repeatPoke[j];
+                    comboOfLocation.push_back(pokeStop);        
+               }
+          }
+          pokeStop = temp; 
      }
      if (n == 1)
      {
-          nextDigitRotation(comboOfLocation, pokeStop, repeatPoke, n);
-          getCombinationOfLocations(comboOfLocation, pokeStop, repeatPoke, n - 1);
+         
+          for (int j = 0; j < repeatPoke.size(); j++)
+          {
+               if (pokeStop[n].name == repeatPoke[j].name)
+               {
+                    pokeStop[n] = repeatPoke[j];
+                    getCombinationOfLocations(comboOfLocation, pokeStop, repeatPoke, n - 1);
+
+               }
+          } 
      }
      if (n > 1)
      {
-          nextDigitRotation(comboOfLocation, pokeStop, repeatPoke, n);
-          firstDigitRotation(comboOfLocation, pokeStop, repeatPoke);
-          getCombinationOfLocations(comboOfLocation, pokeStop, repeatPoke, n - 1);
+          for (int j = 0; j < repeatPoke.size(); j++)
+          {
+               if (pokeStop[n].name == repeatPoke[j].name)
+               {
+                    pokeStop[n] = repeatPoke[j];
+                    getCombinationOfLocations(comboOfLocation, pokeStop, repeatPoke, 0);
+                    getCombinationOfLocations(comboOfLocation, pokeStop, repeatPoke, n - 1);
+               }
+          }
      }
 }
 
@@ -112,24 +136,29 @@ int main()
      cout << endl;
      print(repeatPoke);
      cout << endl;
-     index.resize(pokeSpots.size());
-     for (int i = 0; i < pokeSpots.size(); i++)
+     index.resize(repeatPoke.size());
+     for (int i = 0; i < repeatPoke.size(); i++)
      {
-          for (int j = 0; j < repeatPoke.size(); j++)
+          for (int j = 0; j < pokeSpots.size(); j++)
           {
-               if (pokeSpots[i].name == repeatPoke[j].name)
+               if (repeatPoke[i].name == pokeSpots[j].name)
                {
                     index[i] = j;
-                    break;
+                    
                }
           }
-
      }
+
+     for (auto x : index)
+          cout << x << " ";
+     cout << endl;
+     int nextDigit = 0;
+
      for (int i = 0; i < pokeSpots.size(); i++)
      {
           getCombinationOfLocations(comboLocation, pokeSpots, repeatPoke, i);
      }
-     //cout << "index : ";
+
      for (auto x : comboLocation)
      {
           print(x);
