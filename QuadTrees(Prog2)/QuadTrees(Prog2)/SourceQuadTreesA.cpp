@@ -20,10 +20,10 @@ node given in the tree and output the picture encoded.
 #include<string>
 #include<iostream>
 #include<iomanip>
-#include<math.h>
+#include<algorithm>
 using namespace std;
 
-const int IMG_SIZE = 64;
+//const int IMG_SIZE = 32;
 const char BLACK = '@';
 const char WHITE = ' ';
 const char NODE = 'i';
@@ -48,12 +48,13 @@ struct QuadNode
 class QuadTree
 {
     QuadNode * root;
+    int imgSize;
     bool checkQuads = false; /*boolean variable gets true only 
 					    when current node is inserted in the 
 					    Quad tree. */
-    char picture[IMG_SIZE][IMG_SIZE];
+    char** picture;
     int numBlackPx = 0;
-    int largestQuad;
+    QuadNode * largestSubtree = nullptr;
 
     void frmStr(QuadNode * & ptr, char letter, int lvl)
     {   /*Purpose:	Inserts QuadNode instances in the tree.
@@ -77,7 +78,8 @@ class QuadTree
 	   }
     }
     bool checkQuadPtr(QuadNode * node)
-    {/*Purpose: Checks the availability of node to insert
+    {
+    	/*Purpose: Checks the availability of node to insert
 			 new node*/
 	   if (node == nullptr)
 		  return true;
@@ -125,9 +127,10 @@ class QuadTree
 		  }
 	   }
     }
-    bool checkSpatialInfo(int row, int col, int index, int level, int & checkRow, int & checkCol)
+
+    bool checkSpatialInfo(int row, int col, int index, int level, int & checkRow, int & checkCol) 
     {
-	   int quadrantResolution = IMG_SIZE / (pow(2, level));
+	   int quadrantResolution = imgSize / (pow(2, level));
 	   if (index == 0)
 	   {
 		  if ((row >= checkRow && row < checkRow + quadrantResolution) &&
@@ -171,25 +174,36 @@ class QuadTree
 		  }
 		  else
 			 return false;
-	   }  
-    }
-    void largestTree(QuadNode * ptr)
-    {
-	   bool checkSameTree = false;
-	   if (ptr != nullptr)
+	   }
+	   else
 	   {
-		   for(int i = 0 ; i < 4 ; i++)
-		   {
-			   for(int j = i+1 ; j < 4 ; j++)
-			   {
-				   if(sameTree(ptr->quads[i], ptr->quads[j]))
-				   {
-					  largestQuad = IMG_SIZE / (pow(2, ptr->quads[i]->level));
-					  checkSameTree = true;
-				   }
-			   }
-		   }
-		 if()
+		  return false;
+	   }
+    }
+
+    int largestRepeat(QuadNode * ptr)
+    {   
+	   if( ptr != nullptr)
+	   {
+		  if (ptr->type != NODE && ptr->level == 0)
+			 return 0;
+		 if(ptr->type == NODE)
+		 {
+			 for(int i = 0; i < 4; i++)
+			 {
+				 for(int j = i+1; j < 4; j++)
+				 {
+					 if(sameTree(ptr->quads[i], ptr->quads[j]))
+					 {
+						return imgSize / pow(2, ptr->quads[i]->level);
+					 }
+				 }
+			  if(ptr->quads[i]-> type == NODE)
+			  {
+				 return largestRepeat(ptr->quads[i]);
+			  }
+			 }
+		 }
 	   }
     }
 
@@ -208,8 +222,14 @@ class QuadTree
 	   }
     }
 public:
-    QuadTree()
+    QuadTree(int imageSize)
     {
+	   imgSize = imageSize;
+	   picture = new char *[imgSize];
+	   for (int i =0; i< imgSize; i++)
+	   {
+		  picture[i] = new char[i];
+	   }
 	   root = nullptr;// root node initialized to nullptr so no error are thrown
     }
 
@@ -234,9 +254,9 @@ public:
     }
     void printImage()
     {
-	   for (int i = 0; i < IMG_SIZE; i++)
+	   for (int i = 0; i < imgSize; i++)
 	   {
-		  for (int j = 0; j < IMG_SIZE; j++)
+		  for (int j = 0; j < imgSize; j++)
 		  {
 			 cout << picture[j][i];
 		  }
@@ -246,9 +266,9 @@ public:
 
     void querryTree()
     {
-	   for (int i = 0; i < IMG_SIZE; i++)
+	   for (int i = 0; i < imgSize; i++)
 	   {
-		  for (int j = 0; j < IMG_SIZE; j++)
+		  for (int j = 0; j < imgSize; j++)
 		  {
 			 querryTree(j, i, root, 0, 0);
 		  }
@@ -257,7 +277,64 @@ public:
 
     bool sameTree(QuadNode *ptr1, QuadNode *ptr2)
     {
-	   
+
+	   if(ptr1->type == ptr2->type && ptr1->type != NODE)
+	   {
+		  return true;
+	   }
+	   if (ptr1->type == ptr2->type && ptr1->type == NODE)
+	   {
+		  bool checkMatch = true;
+		  int i = 0;
+		  while (checkMatch == true && i < 4)
+		  {
+			 checkMatch = sameTree(ptr1->quads[i], ptr2->quads[i]);
+			 i++;
+		  }
+		  return checkMatch;
+	   }
+	   else
+		  return false;
+	   /*if(ptr1->type == NODE && ptr2->type == NODE)
+	   {
+		  bool checkMatch = true;
+		  int i = 0;
+		  while(checkMatch == true && i < 4)
+		  {
+			 checkMatch = sameTree(ptr1->quads[i], ptr2->quads[i]);
+			 i++;
+		  }
+		  return checkMatch;
+	   }
+	   if(ptr1->type != NODE && ptr2->type == NODE)
+	   {
+		 bool checkMatch = true;
+		 int i = 0;
+		 while(checkMatch ==  true && i < 4)
+		 {
+			checkMatch = sameTree(ptr1, ptr2->quads[i]);
+			i++;
+		 }
+		 return checkMatch;
+	   }
+	   if(ptr1->type == NODE && ptr2->type != NODE)
+	   {
+		  bool checkMatch = true;
+		  int i = 0;
+		  while (checkMatch == true && i < 4)
+		  {
+			 checkMatch = sameTree(ptr1->quads[i], ptr2);
+			 i++;
+		  }
+		  return checkMatch;
+	   }
+	   if(ptr1->type != NODE && ptr2->type != NODE)
+	   {
+		  if (ptr1->type == ptr2->type)
+			 return true;
+		  else
+			 return false;
+	   }*/
     }
 
     int  numBlack() const
@@ -267,20 +344,22 @@ public:
 
     int largestRepeat()
     {
-	   largestRepeat(root);
+	   return largestRepeat(root);
     }
+
 };
 
 int main()
 {
     string input;
-    cin >> input;
-    QuadTree tree;
+    int imgSize;
+    cin >> imgSize >> input;
+    QuadTree tree(imgSize);
     tree.frmStr(input);  
     //tree.printTree();
     tree.querryTree();
     tree.printImage();
-    cout << tree.numBlack()<< endl;
+    cout << tree.numBlack()<<" " << tree.largestRepeat()<<endl;
  
     return 0;
 }
