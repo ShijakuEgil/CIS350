@@ -1,5 +1,5 @@
 /*******************************
-EEgil Shijaku
+Egil Shijaku
 Program 1 (Pokemon GO GO)
 CIS 350 (online)
 Prof. Bruce Elenbogen
