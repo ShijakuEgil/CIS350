@@ -95,6 +95,11 @@ struct Pipes2BUpgraded
 	{
 		junctions = jct;
 		pickedPipes = new int[jct];
+
+		for (int i = 0; i <= jct; i++)
+		{
+			pickedPipes[i] = -1;
+		}
 	}
 };
 
@@ -102,7 +107,7 @@ int main()
 {
 	bool checkLoop = true;
 	int n, m; // will represent nr of junctions and nr of pipes 
-	int completeGraph = (n*(n - 1)) / 2;// will represent the nr of pipes if all junctions were to be connected
+	int completeGraph = (n*(n - 1)) / 2;// will represent the nr of pipes if all n junctions were to be connected(complete graph)
 	while (checkLoop)// loop as long as n and m are not 0 0
 	{
 		cin >> n >> m;
