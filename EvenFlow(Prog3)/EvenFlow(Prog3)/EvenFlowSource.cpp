@@ -44,8 +44,9 @@ using namespace std;
 struct PipeData
 {
 	/*
-	pre:	thre integers required
-	post:	an object that hold pipe data created*/
+	Description:	creates an object of PipeData that contains all pipe info
+	pre:			thre integers required
+	post:			an object that hold pipe data created*/
 	int fstJct, secJct, flow;
 	PipeData(int fJ, int sJ, int flw)
 	{
@@ -55,7 +56,7 @@ struct PipeData
 	}
 	friend bool operator < (PipeData lhs, PipeData rhs)
 	{
-		return lhs.flow < rhs.flow;
+		return lhs.flow < rhs.flow; // sorting the vector containing pipedata
 	}
 };
 class Pipes2BUpgraded
@@ -67,22 +68,24 @@ public:
 	Pipes2BUpgraded(int jct)
 	{
 		/*
-		pre:	number of juctions is required
-		post:	two array depending on number of jcts are created*/
+		Description:	creates an array with the size of the junctions
+						The corrensponding value will be the junction pointed
+		pre:			number of juctions is required
+		post:			two array depending on number of jcts are created*/
 		junctions = jct;
 		pickedPipes = new int[jct + 1];
-		treeHeight = new int[jct + 1];
 		for (int i = 0; i <= jct; i++)
 		{
 			pickedPipes[i] = i;
-			treeHeight[i] = 1;
 		}
 	}
+
 	int find(int node)
 	{
 		/*
-		pre:	a node that is include inside the array is required
-		post:	value of pickedPipes[Node] that is not the same as node is returned */
+		Description:	returns the root of the node in the subtree
+		pre:			a node that is include inside the array is required
+		post:			value of pickedPipes[Node] that is not the same as node is returned */
 		if (pickedPipes[node] != node)
 		{
 			pickedPipes[node] = find(pickedPipes[node]);
@@ -92,31 +95,19 @@ public:
 	void merge(int node1, int node2)
 	{
 		/*
-		pre:	two nodes that belong in the range os junctions re needed and that are not in the same set
-		post:	those two nodes are merged in one set*/
+		Description:	merge = union function... merges two nodes together.
+		pre:			two nodes that belong in the range os junctions re needed and that are not in the same set
+		post:			those two nodes are merged in one set*/
 		int a = find(node1);
 		int b = find(node2);
 
-		if (treeHeight[a] > treeHeight[b])
+		if (pickedPipes[a] < pickedPipes[b])
 		{
 			pickedPipes[b] = a;
-			treeHeight[a] += treeHeight[b];
 		}
 		else
 		{
 			pickedPipes[a] = b;
-		}
-		if (treeHeight[a] == treeHeight[b])
-		{
-			treeHeight[b]++;
-		}
-	}
-
-	void print()
-	{
-		for (int i = 0; i <= junctions; i++)
-		{
-			cout << pickedPipes[i] << treeHeight[i] << endl;
 		}
 	}
 };
@@ -125,13 +116,13 @@ class CityPipeLine
 	int junctions;
 	int pipes;
 	vector<PipeData> pipeNet;
-	int ptr = -1;
 public:
 	CityPipeLine(int n, int m)
 	{
 		/*
-		pre:	exact nr of pipes and juctions needed
-		post:	nr of jct and pipes are added to the graph*/
+		Description:	creates a graph with only vertices no edges
+		pre:			exact nr of pipes and juctions needed
+		post:			nr of jct and pipes are added to the graph*/
 		junctions = n;
 		pipes = m;
 	}
@@ -139,52 +130,61 @@ public:
 	void addPipe(int jct1, int jct2, int flow)
 	{
 		/*
-		pre:	data for one pipe is needed
-		post:	an object with pipe data is added to pipeNet vector*/
+		Description:	adds an edge to the graph 
+		pre:			data for one pipe is needed
+		post:			an object with pipe data is added to pipeNet vector*/
 		PipeData newPipe(jct1, jct2, flow);
 		pipeNet.push_back(newPipe);
 	}
 	int findOptimalFlowSpan()
 	{
 		/*
-		pre:	needs to be called after pipeNet is completed
-		post: will return the max - min for the min spann tree*/
-		ptr++;
-		if (pipeNet.size() - ptr < junctions - 1)
-			return -2;
-		vector<int> minFlows;
+		Description:	find the spanning tree with the minimal flow difference 
+						between max and min flow values
+		pre:			needs to be called after pipeNet is completed a full 
+		post:			will return the max - min for the min spann tree*/
+		int minFlow = -2; 
+		bool check = false;
 		sort(pipeNet.begin(), pipeNet.end());
-		Pipes2BUpgraded span(junctions);
 
-		for (int it = ptr; it < pipeNet.size(); it++)
-		{
-			if (minFlows.size() == junctions - 1)
-				break;
-			int x = span.find(pipeNet[it].fstJct);
-			int y = span.find(pipeNet[it].secJct);
-			if (x != y)
+		while ((minFlow != 0 && minFlow != -1) && check == false)
+		{ 
+			Pipes2BUpgraded span(junctions);
+			vector<int> minFlows;
+
+			for (int i = 0; i < pipeNet.size(); i++)
 			{
-				minFlows.push_back(pipeNet[it].flow);
-				span.merge(x, y);
+				int x = span.find(pipeNet[i].fstJct);
+				int y = span.find(pipeNet[i].secJct);
+				if (x != y)
+				{
+					minFlows.push_back(pipeNet[i].flow);
+					span.merge(x, y);
+				}
 			}
+			if (minFlows.size() < junctions - 1)
+			{
+				check = true;
+			}
+			if (minFlow == -2 && minFlows.size() < junctions - 1)
+			{
+				minFlow = -1;
+				check = true;
+			}
+			if (minFlow == -2)
+			{
+				minFlow = minFlows[minFlows.size() - 1] - minFlows[0];
+			}
+			if(minFlow != -2 && check == false)
+			{
+				if (minFlow > minFlows[minFlows.size() - 1] - minFlows[0])
+				{
+					minFlow = minFlows[minFlows.size() - 1] - minFlows[0];
+				}
+			}
+			pipeNet.erase(pipeNet.begin());
 		}
-		if (minFlows.size() == 1)
-		{
-			return minFlows[0];
-		}
-		if (minFlows.size() > 1)
-		{
-			return minFlows[minFlows.size() - 1] - minFlows[0];
-		}
-		return -1;
-	}
-	void print()
-	{
-		sort(pipeNet.begin(), pipeNet.end());
-		for (auto x : pipeNet)
-		{
-			cout << x.fstJct << x.secJct << x.flow << endl;
-		}
+		return minFlow;
 	}
 };
 int main()
@@ -195,32 +195,28 @@ int main()
 	{
 		vector<int> flows;
 		CityPipeLine city(n, m);
-		for (int i = 0; i < m; i++)
+		if (m > 0 && n >= 2)
 		{
-			cin >> a >> b >> w;
-			city.addPipe(a, b, w);
-		}
-		int min = 1;
-		if (m >= n - 1)
-		{
-			while (min > 0)
+			for (int i = 0; i < m; i++)
 			{
-				min = city.findOptimalFlowSpan();
-				if (min != -2)
-				{
-					flows.push_back(min);
-				}
+
+				cin >> a >> b >> w;
+				city.addPipe(a, b, w);
 			}
-			sort(flows.begin(), flows.end());
-			finalFlows.push_back(flows[0]);
 		}
-		else if (m < n - 1)
+		if (n != 0 && (m <= 1 || m > (n*(n - 1) / 2)))
+		{
 			finalFlows.push_back(-1);
+		}
+		else
+		{
+			int min = city.findOptimalFlowSpan();
+			finalFlows.push_back(min);
+		}
 	}
 	for (auto x : finalFlows)
 	{
 		cout << x << endl;
 	}
-
 	return 0;
 }
