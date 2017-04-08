@@ -10,7 +10,7 @@ Description:
 #include<vector>
 #include<algorithm>
 using namespace std;
-enum OP_ALPHABET{ add = '+', sub = '-', mul = 'x', div = '/' };
+//enum OP_ALPHABET{ add = '+', sub = '-', mul = 'x', div = '/' };
 vector<pair<int, char>> cageOper;
 
 class KenKen
