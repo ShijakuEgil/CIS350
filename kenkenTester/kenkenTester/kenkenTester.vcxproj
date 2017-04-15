@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{0A41B580-FB43-49DB-9E8F-D8C68FF3E15D}</ProjectGuid>
+    <ProjectGuid>{2892F689-4FD1-4A8E-80E4-EA52320BE38A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>kenkenTester</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
