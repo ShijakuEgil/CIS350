@@ -3,55 +3,64 @@
 #include<string>
 #include<vector>
 using namespace std;
-
-struct Cage
+struct Pair
 {
-	
-	char Id, oper;
-	int maxRow = -1;
-	int maxCol = -1;
-	int res;
-	vector<pair<int, int>> cageLoc;
-	Cage(char cellId, int row, int col)
+	int row;
+	int col;
+	Pair(int r, int c)
 	{
-		maxRow = row;
-		maxCol = col;
-		Id = cellId;
-		pair<int, int> cellLoc;
-		cellLoc.first = row;
-		cellLoc.second = col;
-		cageLoc.push_back(cellLoc);
+		row = r;
+		col = c;
 	}
-	void addCellLoc(int row, int col)// adss locations of points that make up
+};
+class Cage
+{
+	char id, op;
+	int cellRow = -1, result;
+	vector<int> test;
+	vector<Pair> cagePoints;
+public:
+
+	Cage(char cId)
 	{
-		if (row > maxRow)
-			maxRow = row;
-		if (col > maxCol)
-			maxCol = col;
-		pair<int, int> cellLoc;
-		cellLoc.first = row;
-		cellLoc.second = col;
-		cageLoc.push_back(cellLoc);
+		id = cId;
 	}
-	bool checkIfFull(int row)
+	void setPoints(int row, int col)
 	{
-		if (row >= maxRow)
+		if (row > cellRow)
+			cellRow = row;
+		Pair p(row, col);
+		cagePoints.push_back(p);
+		test.push_back(col);
+	}
+	char getId()
+	{
+		return id;
+	}
+	void setOp(char oper)
+	{
+		op = oper;
+	}
+	void setResult(int res)
+	{
+		result = res;
+	}
+	bool checkCage(int ** board, int row)
+	{
+		if (row < cellRow)
+		{
 			return true;
+		}
 		else
-			return false;
-	}
-	bool getResult(int ** board, int row)
-	{
-		if (checkIfFull(row))
 		{
 			vector<int> points;
-			int result = 0;
-			switch (oper)
+			int res = 0;
+			switch (op)
 			{
 			case '+':
-				for (auto x : cageLoc)
+				for (auto x : cagePoints)
 				{
-					result += board[x.first][x.second];
+					res += board[x.row][x.row];
 				}
 				if (result == res)
 					return true;
@@ -59,9 +68,9 @@ struct Cage
 					return false;
 			case 'x':
 				result = 1;
-				for (auto x : cageLoc)
+				for (auto x : cagePoints)
 				{
-					result *= board[x.first][x.second];
+					result *= board[x.row][x.col];
 				}
 				if (result == res)
 					return true;
@@ -69,9 +78,9 @@ struct Cage
 					return false;
 			case '/':
 				points.clear();
-				for (auto x : cageLoc)
+				for (auto x : cagePoints)
 				{
-					points.push_back(board[x.first][x.second]);
+					points.push_back(board[x.row][x.col]);
 				}
 				sort(points.begin(), points.end());
 				result = points[1] / points[0];
@@ -81,9 +90,9 @@ struct Cage
 					return false;
 			case '-':
 				points.clear();
-				for (auto x : cageLoc)
+				for (auto x : cagePoints)
 				{
-					points.push_back(board[x.first][x.second]);
+					points.push_back(board[x.row][x.col]);
 				}
 				sort(points.begin(), points.end());
 				result = points[1] - points[0];
@@ -91,35 +100,42 @@ struct Cage
 					return true;
 				else
 					return false;
-
 			}
 		}
-		else
-			return false;
+	}
+	void print()
+	{
+		//cout << "print from cage:" << endl;
+		cout << id << " : ";
+		vector<Pair> ::iterator it;
+		for (it = cagePoints.begin(); it != cagePoints.end(); ++it)
+		{
+			cout << "(" << it->row << ", " << it->col << ")" << op << " " << result << " " << cellRow;
+		}
+		cout << endl;
 	}
 };
-
 class Board
 {
-	int boardSize, cages;
-	vector<int> numbers;
-	vector<Cage> cageObj;
-	int ** boards;
-
+	int boardSize;
+	int nrOfCages;
+	int ** board;
+	vector<int> nrs;
+	vector<Cage> cages;
+	vector<Cage> ::iterator it;
+	Cage * c;
 	bool findSolution(int** board, vector<int> nr, int row)
 	{
-		cout << "recursive " << row << endl;
-
 		bool check = false;
 		do
 		{
 			insertRow(nr, row);
-			if (checkRow(board, nr, row) && row == boardSize - 1 && )
+			if (checkRow(board, nr, row) && row == boardSize - 1 && checkCages(board, row))
 			{
 				return true;
 			}
 
-			if (checkRow(board, nr, row))
+			if (checkRow(board, nr, row) && checkCages(board, row))
 			{
 				check = findSolution(board, nr, row + 1);
 			}
@@ -127,28 +143,32 @@ class Board
 			{
 				return true;
 			}
-
 		} while (next_permutation(nr.begin(), nr.end()));
 
 		return false;
 	}
-
+	bool checkCages(int ** board, int row)
+	{
+		bool check;
+		for (it = cages.begin(); it != cages.end(); ++it)
+		{
+			check = it->checkCage(board, row);
+		}
+	}
 	void insertRow(vector<int> nr, int row)
 	{
 		for (int j = 0; j < boardSize; j++)
 		{
-			boards[row][j] = nr[j];
+			board[row][j] = nr[j];
 		}
-		//print();
 	}
-
 	bool checkRow(int ** board, vector<int> nr, int row)
 	{
 		for (int i = 0; i < boardSize; i++)
 		{
 			for (int j = 0; j < row; j++)
 			{
-				if (boards[row][i] == boards[j][i])
+				if (board[row][i] == board[j][i])
 				{
 					return false;
 				}
@@ -157,65 +177,73 @@ class Board
 		return true;
 	}
 public:
-	Board(int size, int nrCages)
+	Board(int size, int cage)
 	{
-		cages = nrCages;
 		boardSize = size;
-		boards = new int * [size];
-		cageObj.resize(cages);
-		for (int i = 0; i < size; i++)
+		nrOfCages = cage;
+		board = new int *[boardSize];
+		for (int i = 0; i < boardSize; i++)
 		{
-			boards[i] = new int[size];
-			numbers.push_back(i + 1);
+			board[i] = new int[boardSize];
+			nrs.push_back(i + 1);
 		}
-		
 	}
-
 	void findSolution()
 	{
-		if (findSolution(boards, numbers, 0))
-		{
+		if (findSolution(board, nrs, 0))
 			print();
-		}
-		
+		else
+			cout << "no solution" << endl;
 	}
-	void setCage(char cellId, int row, int col)
+	void setCage(char id, int row, int col)
 	{
-		if (cageObj.size() == 0)
+		if (cages.size() == 0)
 		{
-			Cage newCage(cellId, row, col);
-			cageObj.push_back(newCage);
+			c = new Cage(id);
+			c->setPoints(row, col);
+			cages.push_back(*c);
 		}
 		else
 		{
 			bool check = false;
-			for (auto x : cageObj)
+			for (it = cages.begin(); it != cages.end(); ++it)
 			{
-				if (cellId == x.Id)
+				if (id == it->getId())
 				{
-					x.addCellLoc(row, col);
 					check = true;
+					it->setPoints(row, col);
 				}
 			}
-			if (check == false)
+			if (!check)
 			{
-				Cage newCage(cellId, row, col);
-				cageObj.push_back(newCage);
+				c = new Cage(id);
+				c->setPoints(row, col);
+				cages.push_back(*c);
 			}
 		}
 	}
-	void addCageOperands(int result, char oper, int i)
+	void addCageOperands(vector<pair< int, char>> p)
 	{
-		cageObj[i].res = result;
-		cageObj[i].oper = oper;
+		int i = 0;
+		for (it = cages.begin(); it != cages.end(); ++it)
+		{
+			it->setOp(p[i].second);
+			it->setResult(p[i].first);
+			i++;
+		}
 	}
+
 	void print()
 	{
+		/*for (it = cages.begin(); it != cages.end(); ++it)
+		{
+		it->print();
+		}*/
 		for (int i = 0; i < boardSize; i++)
 		{
 			for (int j = 0; j < boardSize; j++)
 			{
-				cout << boards[i][j] << " ";
+				cout << board[i][j] << " ";
 			}
 			cout << endl;
 		}
@@ -226,7 +254,9 @@ int main()
 {
 	int size, nrCages, operand;
 	char cellId;
+	vector<pair<int, char> > operands;
 	cin >> size >> nrCages;
+
 	if ((size >= 3 && size <= 9) && (nrCages >= size && nrCages <= pow(size, 2) / 2))
 	{
 		Board newBoard(size, nrCages);
@@ -235,14 +265,21 @@ int main()
 			for (int j = 0; j < size; j++)
 			{
 				cin >> cellId;
+				newBoard.setCage(cellId, i, j);
 			}
 		}
-		for (int i = 0; i <= nrCages; i++)
+		for (int i = 0; i < nrCages; i++)
 		{
 			cin >> operand >> cellId;
-			newBoard.addCageOperands(operand, cellId, i);
+			pair<int, char> p;
+			p.first = operand;
+			p.second = cellId;
+			operands.push_back(p);
 		}
-		newBoard.findSolution();
+		newBoard.addCageOperands(operands);
+		/*cout << "print form main: " << endl;*/
+		newBoard.print();
 	}
+	system("pause");
 	return 0;
 }
